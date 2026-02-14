@@ -52,7 +52,7 @@ else()
     target_compile_options(${TARGET_NAME} 
         PRIVATE 
             -g 
-            -std:c++20 
+            -std=c++20 
             -Wall 
             -Wextra
     )

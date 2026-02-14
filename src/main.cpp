@@ -2,62 +2,62 @@
 
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
-#include <vector>
 
-class MainScript : public pain::WorldObject
-{
-public:
+#include "Editor.h"
+
+class MainScript : public pain::WorldObject {
+ public:
   static MainScript &createScriptScene(pain::Scene &scene, int cameraWidth,
-                                       int cameraHeight, float zoom,
-                                       pain::Application *app)
-  {
-    return pain::Scene::emplaceScript<MainScript>(scene.getEntity(), scene
-                                                  );
+                                       int cameraHeight, float zoomOrFOV,
+                                       pain::Application *app) {
+    UNUSED(cameraWidth);
+    UNUSED(cameraHeight);
+    UNUSED(app);
+    UNUSED(zoomOrFOV);
+    return pain::Scene::emplaceScript<MainScript>(scene.getEntity(), scene);
   }
   void onCreate() {}
   MainScript(reg::Entity entity, pain::Scene &scene)
-      : pain::WorldObject(entity, scene), //
-  {};
+      : pain::WorldObject(entity, scene) {};
 
-  void onUpdate(pain::DeltaTime dt){}
-  void onRender(pain::Renderer2d &renderer, bool isMinimazed,
-                pain::DeltaTime currentTime)
-  {
-    renderer.drawQuad({-0.2f, -0.2f}, {0.25f, 0.25f}, {204, 51, 25, 255},
-                      glm::pi<float>() * -currentTime.getSeconds(),
-                      pain::RenderLayer::Default,
-                      pain::TextureManager::getTexture(
-                          "resources/textures/Checkerboard.png"));
-    renderer.drawQuad({0.0f, 0.0f}, {0.25f, 0.25f}, {230, 230, 51, 255},
-                      pain::RenderLayer::Default,
-                      pain::TextureManager::getDefaultTexture(
-                          pain::TextureManager::General, false));
+  void onUpdate(pain::DeltaTime dt) { UNUSED(dt); }
+  void onRender(pain::Renderers &rs, bool isMinimazed,
+                pain::DeltaTime currentTime) {
+    UNUSED(isMinimazed)
+    rs.renderer2d.drawQuad({-0.2f, -0.2f}, {0.25f, 0.25f}, {204, 51, 25, 255},
+                           glm::pi<float>() * -currentTime.getSeconds(),
+                           pain::RenderLayer::Default,
+                           pain::TextureManager::getTexture(
+                               "resources/textures/Checkerboard.png"));
+    rs.renderer2d.drawQuad({0.0f, 0.0f}, {0.25f, 0.25f}, {230, 230, 51, 255},
+                           pain::RenderLayer::Default,
+                           pain::TextureManager::getDefaultTexture(
+                               pain::TextureManager::General, false));
 
-    renderer.drawQuad({-0.5f, 0.5f}, {0.25f, 0.25f}, {255, 255, 255, 255},
-                      pain::RenderLayer::Default,
-                      pain::TextureManager::getTexture(
-                          "resources/textures/Checkerboard original.png"));
-    renderer.drawQuad({0.2f, -0.2f}, {0.25f, 0.25f}, {204, 51, 26, 255},
-                      glm::pi<float>() * currentTime.getSeconds(),
-                      pain::RenderLayer::MuchCloser,
-                      pain::TextureManager::getTexture(
-                          "resources/textures/Checkerboard.png"));
-    renderer.drawQuad({0.2f, 0.2f}, {0.25f, 0.25f}, {230, 230, 51, 255},
-                      pain::RenderLayer::MuchCloser,
-                      pain::TextureManager::getDefaultTexture(
-                          pain::TextureManager::General, false));
-    renderer.drawQuad({-0.2f, 0.2f}, {0.25f, 0.25f}, {255, 255, 255, 255},
-                      pain::RenderLayer::MuchCloser,
-                      pain::TextureManager::getTexture(
-                          "resources/textures/Checkerboard original.png"));
-    renderer.drawCircle({0.5f, 0.5f}, 0.25f, {51, 75, 230, 255});
-    renderer.drawTri({-0.5f, -0.5f}, {0.25f, 0.25f}, {0.2f, 0.3f,
-    0.9f, 1.f});
+    rs.renderer2d.drawQuad({-0.5f, 0.5f}, {0.25f, 0.25f}, {255, 255, 255, 255},
+                           pain::RenderLayer::Default,
+                           pain::TextureManager::getTexture(
+                               "resources/textures/Checkerboard original.png"));
+    rs.renderer2d.drawQuad({0.2f, -0.2f}, {0.25f, 0.25f}, {204, 51, 26, 255},
+                           glm::pi<float>() * currentTime.getSeconds(),
+                           pain::RenderLayer::MuchCloser,
+                           pain::TextureManager::getTexture(
+                               "resources/textures/Checkerboard.png"));
+    rs.renderer2d.drawQuad({0.2f, 0.2f}, {0.25f, 0.25f}, {230, 230, 51, 255},
+                           pain::RenderLayer::MuchCloser,
+                           pain::TextureManager::getDefaultTexture(
+                               pain::TextureManager::General, false));
+    rs.renderer2d.drawQuad({-0.2f, 0.2f}, {0.25f, 0.25f}, {255, 255, 255, 255},
+                           pain::RenderLayer::MuchCloser,
+                           pain::TextureManager::getTexture(
+                               "resources/textures/Checkerboard original.png"));
+    rs.renderer2d.drawCircle({0.5f, 0.5f}, 0.25f, {51, 75, 230, 255});
+    rs.renderer2d.drawTri({-0.5f, -0.5f}, {0.25f, 0.25f},
+                          {0.2f, 0.3f, 0.9f, 1.f});
   }
 };
 
-pain::Application *pain::createApplication()
-{
+pain::Application *pain::createApplication() {
   // Retrieve the context the player will alter when using the launcher
   IniConfig ini;
   ini.readAndUpdate();
@@ -67,11 +67,12 @@ pain::Application *pain::createApplication()
   internalIni.readAndUpdate(ini.assetsPath.value.c_str());
 
   // Create the application + OpenGL + Event contexts
-  Application *app = Application::createApplication(         //
-      {.title = internalIni.title.get().c_str(),             //
-       .defaultWidth = ini.defaultWidth.get(),               //
-       .defaultHeight = ini.defaultHeight.get()},            //
-      {.swapChainTarget = internalIni.swapChainTarget.get()} //
+  Application *app = Application::createApplication(  //
+      {.title = internalIni.title.get().c_str(),      //
+       .defaultWidth = ini.defaultWidth.get(),        //
+       .defaultHeight = ini.defaultHeight.get(),
+       .is3d = internalIni.is3d.get()},                       //
+      {.swapChainTarget = internalIni.swapChainTarget.get()}  //
   );
 
   // Create the ECS World Scene
@@ -88,11 +89,11 @@ pain::Application *pain::createApplication()
 
   // (Optional) Defining a small native script (MainScript) for the world scene
   // that will be executed on. Must have added System::NativeScript
-  MainScript::createScriptScene(     //
-      scene, ini.defaultWidth.get(), //
-      ini.defaultHeight.get(),       //
-      internalIni.zoomLevel.get(),   //
-      app                            //
+  MainScript::createScriptScene(      //
+      scene, ini.defaultWidth.get(),  //
+      ini.defaultHeight.get(),        //
+      internalIni.zoomLevel.get(),    //
+      app                             //
   );
 
   // (Optional) Creating the ECS UI scene
